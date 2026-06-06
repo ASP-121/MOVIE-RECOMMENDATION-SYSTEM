@@ -82,11 +82,6 @@ The Dark Knight	Batman raises the stakes in his war...
 
 Make sure your CSV has a title and description column.
 
-### 📬 Contact
-
-Pawan Yadav
-
-yaduvanshi2000pawan@gmail.com
 
 ### 📄 License
 
