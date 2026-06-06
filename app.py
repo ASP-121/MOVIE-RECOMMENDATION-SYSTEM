@@ -4,6 +4,7 @@ import numpy as np
 import requests
 from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
 from sklearn.neighbors import NearestNeighbors
+from sklearn.metrics.pairwise import cosine_similarity
 from PIL import Image
 
 
@@ -57,15 +58,18 @@ def recommend(movie_name):
     recommendations = []
     posters = []
     plots = []
+    similarities = []
 
-    for i in indices[0][1:]:  # Skip the first one (input movie itself)
-        title = df.iloc[i]['name']
+    for idx, distance in zip(indices[0][1:], distances[0][1:]):
+        title = df.iloc[idx]['name']
+        similarity = (1 - distance) * 100
         poster, plot = fetch_poster_omdb(title)
         recommendations.append(title)
         posters.append(poster)
         plots.append(plot)
+        similarities.append(round(similarity, 2))
 
-    return recommendations, posters, plots
+    return recommendations, posters, plots, similarities
 
 # UI
 st.title("🎬 Movie Recommendation System")
@@ -83,7 +87,7 @@ selected_movie = st.selectbox(
 )
 
 if st.button("Show Recommendation"):
-    names, posters, plots = recommend(selected_movie)
+    names, posters, plots, similarities = recommend(selected_movie)
     if len(names) == 0:
         st.warning("No recommendations found.")
     else:
@@ -95,6 +99,6 @@ if st.button("Show Recommendation"):
                     unsafe_allow_html=True
                 )
                 st.text(names[i])
-                # st.caption(plots[i])
+                st.caption(f"Similarity: {similarities[i]}%")
 
 
