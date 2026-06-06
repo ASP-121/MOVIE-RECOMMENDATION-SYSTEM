@@ -41,10 +41,13 @@ def fetch_poster_omdb(movie_title):
             plot = response.get('Plot', 'No plot available')
             if poster == "N/A" or poster is None:
                 poster = DEFAULT_POSTER
-            return poster, plot
+            rating = response.get('imdbRating', 'N/A')
+            year = response.get('Year', 'N/A')
+            runtime = response.get('Runtime', 'N/A')
+            return poster, plot, rating, year, runtime
     except:
         pass
-    return DEFAULT_POSTER, "Poster not found or Movie not found."
+    return DEFAULT_POSTER, "Not Found", "N/A", "N/A", "N/A"
 
 # Recommendation logic
 def recommend(movie_name):
@@ -59,17 +62,23 @@ def recommend(movie_name):
     posters = []
     plots = []
     similarities = []
+    ratings = []
+    years = []
+    runtimes = []
 
     for idx, distance in zip(indices[0][1:], distances[0][1:]):
         title = df.iloc[idx]['name']
         similarity = (1 - distance) * 100
-        poster, plot = fetch_poster_omdb(title)
+        poster, plot, rating, year, runtime = fetch_poster_omdb(title)
+        ratings.append(rating)
+        years.append(year)
+        runtimes.append(runtime)
         recommendations.append(title)
         posters.append(poster)
         plots.append(plot)
         similarities.append(round(similarity, 2))
 
-    return recommendations, posters, plots, similarities
+    return recommendations, posters, plots, ratings, years, runtimes, similarities
 
 # UI
 st.title("🎬 Movie Recommendation System")
@@ -87,7 +96,7 @@ selected_movie = st.selectbox(
 )
 
 if st.button("Show Recommendation"):
-    names, posters, plots, similarities = recommend(selected_movie)
+    names, posters, plots, ratings, years, runtimes, similarities = recommend(selected_movie)
     if len(names) == 0:
         st.warning("No recommendations found.")
     else:
@@ -100,5 +109,9 @@ if st.button("Show Recommendation"):
                 )
                 st.text(names[i])
                 st.caption(f"Similarity: {similarities[i]}%")
+                st.caption(f"⭐ IMDb: {ratings[i]}")
+                st.caption(f"📅 Year: {years[i]}")
+                st.caption(f"⏱ Runtime: {runtimes[i]}")
+                
 
 
