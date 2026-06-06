@@ -53,7 +53,7 @@ def recommend(movie_name):
         st.error("Movie not found in database.")
         return [], [], []
 
-    distances, indices = model.kneighbors([X[index]], n_neighbors=6)
+    distances, indices = model.kneighbors([X[index]], n_neighbors=num_recommendations+1)
     recommendations = []
     posters = []
     plots = []
@@ -70,6 +70,13 @@ def recommend(movie_name):
 # UI
 st.title("🎬 Movie Recommendation System")
 
+num_recommendations= st.slider(
+    "Number of Recommendations",
+    min_value=3,
+    max_value=15,
+    value=5
+)
+
 selected_movie = st.selectbox(
     "Type or select a movie from the dropdown:",
     df['name'].values
@@ -80,8 +87,8 @@ if st.button("Show Recommendation"):
     if len(names) == 0:
         st.warning("No recommendations found.")
     else:
-        cols = st.columns(5)
-        for i in range(min(5, len(names))):
+        cols = st.columns(min(num_recommendations, len(names)))
+        for i in range(min(num_recommendations, len(names))):
             with cols[i]:
                 st.markdown(
                     f"<img src='{posters[i]}' width='100%' style='border-radius: 10px;'>",
@@ -90,8 +97,4 @@ if st.button("Show Recommendation"):
                 st.text(names[i])
                 # st.caption(plots[i])
 
-# Footer
-st.markdown(
-    "<hr><h6 style='text-align:center;'>Developed by: PAWAN YADAV © 2023 All rights reserved.</h6>",
-    unsafe_allow_html=True
-)
+
